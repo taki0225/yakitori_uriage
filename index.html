@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="売上帳">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>焼き鳥 売り上げ帳</title>
+  <style>
+    :root {
+      --bg: #0f0f10;
+      --panel: #1b1b1e;
+      --panel2: #242428;
+      --text: #f6f2ea;
+      --muted: #bdb7ad;
+      --line: #36363c;
+      --accent: #f4b45f;
+      --danger: #ff7a7a;
+      --ok: #7ee28d;
+      --input: #101013;
+      --shadow: rgba(0,0,0,.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", "Yu Gothic", sans-serif;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      padding: calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 18px);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 8px 4px 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 23px;
+      letter-spacing: .03em;
+      line-height: 1.15;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel), #161619);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 12px 24px var(--shadow);
+    }
+
+    .status {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      color: var(--text);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin: 0 0 5px 2px;
+    }
+
+    .field {
+      margin-bottom: 10px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--input);
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+    }
+
+    input, select {
+      height: 46px;
+      padding: 0 12px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(244, 180, 95, .14);
+    }
+
+    select {
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 19px,
+        calc(100% - 12px) 19px;
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+    }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .row3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .section-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin: 14px 0 8px;
+      color: var(--text);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .section-title small {
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 14px;
+      min-height: 48px;
+      padding: 12px 14px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #17120d;
+      background: var(--accent);
+      box-shadow: 0 8px 18px rgba(244, 180, 95, .18);
+    }
+
+    button.secondary {
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    button.danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(255,122,122,.45);
+      box-shadow: none;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      opacity: .9;
+    }
+
+    textarea {
+      min-height: 258px;
+      padding: 12px;
+      resize: vertical;
+      line-height: 1.55;
+      font-size: 15px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .details {
+      margin: 10px 0 0;
+      padding: 10px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .warning {
+      margin-top: 10px;
+      color: var(--danger);
+      background: rgba(255,122,122,.08);
+      border: 1px solid rgba(255,122,122,.28);
+      padding: 10px;
+      border-radius: 13px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .done {
+      color: var(--ok);
+      font-size: 13px;
+      margin-top: 10px;
+      line-height: 1.55;
+    }
+
+    .hidden { display: none !important; }
+
+    .mini-note {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.55;
+      margin-top: 7px;
+    }
+
+    @media (max-width: 360px) {
+      body { padding-left: 10px; padding-right: 10px; }
+      .card { padding: 12px; border-radius: 16px; }
+      input, select { height: 44px; font-size: 16px; }
+      h1 { font-size: 21px; }
+      .btns { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>焼き鳥 売り上げ帳</h1>
+      <div class="sub">iPhone 12 mini向け。一般串150円・つくね170円版。データはこの端末のブラウザ内だけに保存されます。</div>
+    </header>
+
+    <section class="card">
+      <div class="status">
+        <span class="pill" id="carryoverStatus">繰越：未確認</span>
+        <span class="pill" id="todayStatus">日付：未開始</span>
+      </div>
+
+      <button id="startBtn" type="button">開始</button>
+
+      <div id="formArea" class="hidden">
+        <div class="row2" style="margin-top:12px;">
+          <div class="field">
+            <label for="dateText">日付</label>
+            <input id="dateText" type="text" readonly>
+          </div>
+          <div class="field">
+            <label for="weather">天気</label>
+            <select id="weather">
+              <option value="晴">晴</option>
+              <option value="曇">曇</option>
+              <option value="雨">雨</option>
+              <option value="大雨">大雨</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-title">スキミ <small>C kg / D 在庫</small></div>
+        <div class="row2">
+          <div class="field"><label for="C">C</label><input id="C" inputmode="decimal" type="number" step="0.01" placeholder="0"></div>
+          <div class="field"><label for="D">D</label><input id="D" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+        </div>
+
+        <div class="section-title">肝 <small>F 入荷 / H 在庫</small></div>
+        <div class="row2">
+          <div class="field"><label for="F">F</label><input id="F" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+          <div class="field"><label for="H">H</label><input id="H" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+        </div>
+
+        <div class="section-title">皮 <small>L 入荷 / M 在庫</small></div>
+        <div class="row2">
+          <div class="field"><label for="L">L</label><input id="L" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+          <div class="field"><label for="M">M</label><input id="M" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+        </div>
+
+        <div class="section-title">ネギマ <small>O 入荷 / P 在庫</small></div>
+        <div class="row2">
+          <div class="field"><label for="O">O</label><input id="O" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+          <div class="field"><label for="P">P</label><input id="P" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+        </div>
+
+        <div class="section-title">豚バラ <small>R 入荷 / S 在庫</small></div>
+        <div class="row2">
+          <div class="field"><label for="R">R</label><input id="R" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+          <div class="field"><label for="S">S</label><input id="S" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+        </div>
+
+        <div class="section-title">つくね <small>U 入荷 / V 在庫</small></div>
+        <div class="row2">
+          <div class="field"><label for="U">U</label><input id="U" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+          <div class="field"><label for="V">V</label><input id="V" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+        </div>
+
+        <div class="section-title">ロス <small>W 本</small></div>
+        <div class="row3">
+          <div class="field"><label for="W">W</label><input id="W" inputmode="numeric" type="number" step="1" placeholder="0"></div>
+        </div>
+
+        <button id="calcBtn" type="button">計算して出力</button>
+        <div class="mini-note">未入力欄は0として計算します。スキミ係数は計算ごとに24.5〜24.8から新しく生成します。</div>
+      </div>
+    </section>
+
+    <section id="outputCard" class="card hidden">
+      <div class="section-title" style="margin-top:0;">計算内訳</div>
+      <div class="details" id="details"></div>
+      <div id="warning" class="warning hidden"></div>
+
+      <div class="section-title">売り上げ帳</div>
+      <textarea id="ledger" readonly></textarea>
+
+      <div class="btns">
+        <button id="copyBtn" type="button" class="secondary">コピー</button>
+        <button id="recalcBtn" type="button" class="secondary">再計算</button>
+        <button id="confirmBtn" type="button">確定</button>
+        <button id="resetCarryBtn" type="button" class="danger">繰越リセット</button>
+      </div>
+      <div id="doneMsg" class="done hidden"></div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "yakitori_ledger_carryover_v1";
+
+    const ids = ["C","D","F","H","L","M","O","P","R","S","U","V","W"];
+    const $ = (id) => document.getElementById(id);
+
+    let current = null;
+
+    function numberValue(id) {
+      const raw = $(id).value;
+      if (raw === "" || raw === null || raw === undefined) return 0;
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function yen(n) {
+      return Math.round(n).toLocaleString("ja-JP");
+    }
+
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function todayLabel() {
+      const d = new Date();
+      const week = ["日","月","火","水","木","金","土"][d.getDay()];
+      return {
+        label: `${pad2(d.getMonth()+1)}月${pad2(d.getDate())}日(${week})`,
+        day: d.getDay()
+      };
+    }
+
+    function readCarryover() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        if (!saved) return { A:0, E:0, K:0, N:0, Q:0, T:0, lastDate:"なし" };
+        return {
+          A: Number(saved.A) || 0,
+          E: Number(saved.E) || 0,
+          K: Number(saved.K) || 0,
+          N: Number(saved.N) || 0,
+          Q: Number(saved.Q) || 0,
+          T: Number(saved.T) || 0,
+          lastDate: saved.lastDate || "不明"
+        };
+      } catch {
+        return { A:0, E:0, K:0, N:0, Q:0, T:0, lastDate:"読込エラー" };
+      }
+    }
+
+    function writeCarryover(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function resetCarryover() {
+      localStorage.removeItem(STORAGE_KEY);
+      updateCarryoverStatus();
+    }
+
+    function updateCarryoverStatus() {
+      const c = readCarryover();
+      $("carryoverStatus").textContent = `繰越：A${c.A}/E${c.E}/K${c.K}/N${c.N}/Q${c.Q}/T${c.T}`;
+    }
+
+    function showForm() {
+      $("formArea").classList.remove("hidden");
+      $("outputCard").classList.add("hidden");
+      $("doneMsg").classList.add("hidden");
+      setTimeout(() => $("weather").focus(), 80);
+    }
+
+    function start() {
+      const t = todayLabel();
+      $("dateText").value = t.label;
+      $("todayStatus").textContent = `日付：${t.label}`;
+      showForm();
+    }
+
+    function calculate() {
+      const dateText = $("dateText").value || todayLabel().label;
+      const weather = $("weather").value || "晴";
+      const day = todayLabel().day;
+      const carry = readCarryover();
+
+      const C = numberValue("C");
+      const D = numberValue("D");
+      const F = numberValue("F");
+      const H = numberValue("H");
+      const L = numberValue("L");
+      const M = numberValue("M");
+      const O = numberValue("O");
+      const P = numberValue("P");
+      const R = numberValue("R");
+      const S = numberValue("S");
+      const U = numberValue("U");
+      const V = numberValue("V");
+      const W = numberValue("W");
+
+      const A = carry.A;
+      const E = carry.E;
+      const K = carry.K;
+      const N = carry.N;
+      const Q = carry.Q;
+      const T = carry.T;
+
+      const randomFactor = 24.5 + Math.random() * 0.3;
+      const B = Math.round(C * randomFactor);
+      const G = day === 6 ? 0 : 2;
+
+      const skimi = A + B - D;
+      const kimo = E + F - H;
+      const momo = 10;
+      const kawa = K + L - M;
+      const negima = N + O - P;
+      const butabara = Q + R - S;
+      const tsukune = T + U - V;
+
+      const ippan = skimi + kimo + momo + kawa + negima + butabara;
+      const ippanAfterLoss = ippan - W;
+      const ippanSales = ippanAfterLoss * 150;
+      const tsukuneSales = tsukune * 170;
+      const X = ippanSales + tsukuneSales;
+
+      const checkSales = ((skimi + kimo + momo + kawa + negima + butabara - W) * 150) + (tsukune * 170);
+      const checkOk = checkSales === X;
+
+      const ledger = `${dateText} 天気：${weather}
+スキミ：${A}+${B} / ${C}kg - ${D}
+肝：${E}+${F} / ${G}kg - ${H}
+モモ：0+10 / 0.5kg - 0
+皮：${K}+${L} / - ${M}
+ネギマ：${N}+${O} / 1.5kg - ${P}
+豚バラ：${Q}+${R} - ${S}
+つくね：${T}+${U} (¥170) - ${V}
+ロス：${W}
+売上：¥${yen(X)}`;
+
+      const details = `スキミ係数：${randomFactor.toFixed(3)}
+B = round(${C} × ${randomFactor.toFixed(3)}) = ${B}
+
+販売本数
+スキミ：${A}+${B}-${D} = ${skimi}
+肝：${E}+${F}-${H} = ${kimo}
+モモ：0+10-0 = ${momo}
+皮：${K}+${L}-${M} = ${kawa}
+ネギマ：${N}+${O}-${P} = ${negima}
+豚バラ：${Q}+${R}-${S} = ${butabara}
+つくね：${T}+${U}-${V} = ${tsukune}
+
+一般串合計：${ippan}
+ロス差引後：${ippan}-${W} = ${ippanAfterLoss}
+一般串売上：${ippanAfterLoss} × 150 = ¥${yen(ippanSales)}
+つくね売上：${tsukune} × 170 = ¥${yen(tsukuneSales)}
+総売上：¥${yen(X)}
+
+検算：${checkOk ? "OK" : "NG"} / ¥${yen(checkSales)}`;
+
+      const negativeItems = [];
+      [
+        ["スキミ", skimi],
+        ["肝", kimo],
+        ["皮", kawa],
+        ["ネギマ", negima],
+        ["豚バラ", butabara],
+        ["つくね", tsukune],
+        ["ロス差引後一般串", ippanAfterLoss]
+      ].forEach(([name, value]) => {
+        if (value < 0) negativeItems.push(`${name}=${value}`);
+      });
+
+      current = {
+        dateText, weather,
+        A,E,K,N,Q,T,
+        C,D,F,H,L,M,O,P,R,S,U,V,W,
+        B,G,X,ledger,details,
+        carryNext: { A:D, E:H, K:M, N:P, Q:S, T:V, lastDate:dateText }
+      };
+
+      $("details").textContent = details;
+      $("ledger").value = ledger;
+
+      if (negativeItems.length > 0 || !checkOk) {
+        $("warning").classList.remove("hidden");
+        $("warning").textContent =
+          `確認が必要です。${negativeItems.length ? "販売本数がマイナスの項目があります：" + negativeItems.join("、") + "。" : ""}${!checkOk ? " 検算が一致していません。" : ""}`;
+      } else {
+        $("warning").classList.add("hidden");
+        $("warning").textContent = "";
+      }
+
+      $("outputCard").classList.remove("hidden");
+      $("doneMsg").classList.add("hidden");
+      $("outputCard").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function copyLedger() {
+      const text = $("ledger").value;
+      try {
+        await navigator.clipboard.writeText(text);
+        $("doneMsg").classList.remove("hidden");
+        $("doneMsg").textContent = "売り上げ帳をコピーしました。";
+      } catch {
+        $("ledger").focus();
+        $("ledger").select();
+        $("doneMsg").classList.remove("hidden");
+        $("doneMsg").textContent = "コピーできない場合は、テキストボックスを長押ししてコピーしてください。";
+      }
+    }
+
+    function confirmLedger() {
+      if (!current) return;
+      writeCarryover(current.carryNext);
+      updateCarryoverStatus();
+      $("doneMsg").classList.remove("hidden");
+      $("doneMsg").textContent =
+        `確定しました。翌営業日への繰越は A=${current.D}, E=${current.H}, K=${current.M}, N=${current.P}, Q=${current.S}, T=${current.V} です。`;
+      $("confirmBtn").disabled = true;
+      setTimeout(() => { $("confirmBtn").disabled = false; }, 1200);
+    }
+
+    function recalc() {
+      $("outputCard").classList.add("hidden");
+      $("doneMsg").classList.add("hidden");
+      $("warning").classList.add("hidden");
+      $("formArea").classList.remove("hidden");
+      $("weather").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    $("startBtn").addEventListener("click", start);
+    $("calcBtn").addEventListener("click", calculate);
+    $("copyBtn").addEventListener("click", copyLedger);
+    $("confirmBtn").addEventListener("click", confirmLedger);
+    $("recalcBtn").addEventListener("click", recalc);
+    $("resetCarryBtn").addEventListener("click", () => {
+      if (confirm("繰越データを0に戻しますか？")) {
+        resetCarryover();
+        $("doneMsg").classList.remove("hidden");
+        $("doneMsg").textContent = "繰越データをリセットしました。";
+      }
+    });
+
+    ids.forEach(id => {
+      $(id).addEventListener("focus", (e) => e.target.select());
+    });
+
+    updateCarryoverStatus();
+  </script>
+</body>
+</html>
